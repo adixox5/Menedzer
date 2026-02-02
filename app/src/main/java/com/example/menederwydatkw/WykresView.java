@@ -13,11 +13,10 @@ public class WykresView extends View {
     private Paint paint;
     private Map<String, Float> daneKategorii;
 
-    // Domyślnie 50, aby narysować pustą skalę 0-50, gdy brak danych
+    private String symbolWaluty = "PLN";
     private float maxKwota = 50;
-    private float postepAnimacji = 1f; // 1.0 oznacza pełne narysowanie (koniec animacji)
+    private float postepAnimacji = 1f;
 
-    // Stała paleta kolorów dla spójności wizualnej
     private final int[] kolory = {
             Color.parseColor("#2196F3"), // Niebieski
             Color.parseColor("#4CAF50"), // Zielony
@@ -30,20 +29,18 @@ public class WykresView extends View {
     public WykresView(Context context, AttributeSet attrs) {
         super(context, attrs);
         paint = new Paint();
-        paint.setAntiAlias(true); // Wygładzanie krawędzi dla lepszej jakości
+        paint.setAntiAlias(true);
     }
 
-    /**
-     * Metoda używana przez ObjectAnimator do płynnego rysowania słupków.
-     */
+    public void ustawWalute(String nowaWaluta) {
+        this.symbolWaluty = nowaWaluta;
+    }
+
     public void setPostep(float postep) {
         this.postepAnimacji = postep;
-        invalidate(); // Wymusza ponowne wywołanie onDraw()
+        invalidate();
     }
 
-    /**
-     * Przelicza dane i ustala skalę osi Y.
-     */
     public void ustawDane(Map<String, Float> dane) {
         this.daneKategorii = dane;
 
@@ -54,7 +51,6 @@ public class WykresView extends View {
             }
         }
 
-        // Zaokrąglamy skalę w górę do najbliższej "pięćdziesiątki"
         maxKwota = (float) Math.ceil(maxZnaleziona / 50.0) * 50;
         if (maxKwota == 0) maxKwota = 50;
 
@@ -64,32 +60,30 @@ public class WykresView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        canvas.drawColor(Color.parseColor("#F5F5F5")); // Jasne tło
+        canvas.drawColor(Color.parseColor("#F5F5F5"));
 
         int width = getWidth();
         int height = getHeight();
 
-        // Marginesy na opisy osi
-        int paddingLeft = 120;
+        // --- POPRAWKA: Zwiększony margines lewy, żeby liczby się nie ucinały ---
+        int paddingLeft = 180; // Było 120
         int paddingBottom = 80;
         int paddingTop = 50;
         int paddingRight = 40;
 
-        // Obszar roboczy wykresu
         float chartWidth = width - paddingLeft - paddingRight;
         float chartHeight = height - paddingTop - paddingBottom;
 
-        // --- 1. RYSOWANIE SIATKI I SKALI (co 50 PLN) ---
-        paint.setTextSize(30);
+        // --- 1. RYSOWANIE SKALI I SIATKI ---
+        paint.setTextSize(28); // Lekko mniejsza czcionka dla skali
         paint.setTextAlign(Paint.Align.RIGHT);
 
         for (int wartosc = 0; wartosc <= maxKwota; wartosc += 50) {
             float ratio = (float) wartosc / maxKwota;
             float y = (height - paddingBottom) - (ratio * chartHeight);
 
-            // Linie siatki
             if (wartosc == 0) {
-                paint.setColor(Color.BLACK); // Oś X grubsza
+                paint.setColor(Color.BLACK);
                 paint.setStrokeWidth(3);
             } else {
                 paint.setColor(Color.LTGRAY);
@@ -100,14 +94,16 @@ public class WykresView extends View {
             // Podpis wartości na osi Y
             paint.setColor(Color.DKGRAY);
             paint.setStrokeWidth(1);
-            canvas.drawText(wartosc + " zł", paddingLeft - 15, y + 10, paint);
+
+            // Rysujemy tekst z uwzględnieniem waluty
+            canvas.drawText(wartosc + " " + symbolWaluty, paddingLeft - 20, y + 10, paint);
         }
 
         // --- 2. RYSOWANIE SŁUPKÓW ---
         if (daneKategorii != null && !daneKategorii.isEmpty()) {
             int ilosc = daneKategorii.size();
             float szerokoscSekcji = chartWidth / ilosc;
-            float odstep = szerokoscSekcji * 0.25f; // 25% szerokości to odstęp
+            float odstep = szerokoscSekcji * 0.25f;
             float szerokoscSlupka = szerokoscSekcji - 2 * odstep;
 
             float currentX = paddingLeft + odstep;
@@ -117,8 +113,6 @@ public class WykresView extends View {
 
             for (Map.Entry<String, Float> entry : daneKategorii.entrySet()) {
                 float kwota = entry.getValue();
-
-                // Wysokość słupka
                 float ratio = (kwota / maxKwota);
                 float barHeight = ratio * chartHeight * postepAnimacji;
 
@@ -127,7 +121,6 @@ public class WykresView extends View {
                 float right = currentX + szerokoscSlupka;
                 float bottom = height - paddingBottom;
 
-                // Rysowanie prostokąta
                 paint.setColor(kolory[colorIndex % kolory.length]);
                 canvas.drawRect(left, top, right, bottom, paint);
 
@@ -137,20 +130,16 @@ public class WykresView extends View {
                 paint.setTypeface(Typeface.DEFAULT_BOLD);
                 canvas.drawText(String.format("%.0f", kwota), left + szerokoscSlupka / 2, top - 10, paint);
 
-                // NAZWA KATEGORII
+                // Kategoria pod słupkiem
                 paint.setTypeface(Typeface.DEFAULT);
-                paint.setTextSize(25); // Zmniejszona czcionka, żeby więcej się zmieściło
+                paint.setTextSize(25);
                 String kat = entry.getKey();
-
-                // Tutaj usunąłem logikę "if length > 5 then substring..."
-                // Teraz zawsze rysujemy pełną nazwę
                 canvas.drawText(kat, left + szerokoscSlupka / 2, bottom + 40, paint);
 
                 currentX += szerokoscSekcji;
                 colorIndex++;
             }
         } else {
-            // Komunikat o pustym stanie
             paint.setColor(Color.GRAY);
             paint.setTextAlign(Paint.Align.CENTER);
             paint.setTextSize(40);

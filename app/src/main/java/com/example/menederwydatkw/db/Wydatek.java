@@ -14,4 +14,5 @@ public class Wydatek {
     public float kwota;
     public String kategoria;
     public long data;
+    public String waluta;
 }
