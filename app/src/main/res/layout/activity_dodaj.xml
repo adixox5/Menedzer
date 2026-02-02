@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <EditText android:id="@+id/inputTytul" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Opis wydatku" />
+    <EditText android:id="@+id/inputKwota" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="numberDecimal" android:hint="Kwota" />
+
+    <TextView android:text="Kategoria:" android:layout_marginTop="20dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+
+    <RadioGroup
+        android:id="@+id/rgKategorie"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <RadioButton android:id="@+id/rbDom" android:text="Dom" android:checked="true" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <RadioButton android:id="@+id/rbPaliwo" android:text="Paliwo" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <RadioButton android:id="@+id/rbRozrywka" android:text="Rozrywka" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    </RadioGroup>
+
+    <Button android:id="@+id/btnZapiszWydatek" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Zapisz" android:layout_marginTop="20dp"/>
+</LinearLayout>
