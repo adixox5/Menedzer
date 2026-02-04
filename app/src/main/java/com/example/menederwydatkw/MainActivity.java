@@ -23,6 +23,7 @@ import java.util.concurrent.CompletableFuture;
 import com.example.menederwydatkw.db.BazaDanych;
 import com.example.menederwydatkw.db.Wydatek;
 
+// Główna klasa ekranu
 public class MainActivity extends AppCompatActivity {
 
     // Zmienne globalne klasy
@@ -36,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private float limitMiesieczny;
     private String sortowanie;
 
+    // Metoda startowa
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
