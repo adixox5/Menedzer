@@ -40,6 +40,7 @@ public class DodajActivity extends AppCompatActivity {
             String tytul = inputTytul.getText().toString();
             String kwotaStr = inputKwota.getText().toString();
 
+            // Sprawdzenie która kategoria jest zaznaczona
             int selectedId = rgKategorie.getCheckedRadioButtonId();
             String kategoria = "Inne";
             if (selectedId != -1) {
