@@ -23,16 +23,19 @@ public class DodajActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dodaj);
 
+        // Elementy interfejsu
         EditText inputTytul = findViewById(R.id.inputTytul);
         EditText inputKwota = findViewById(R.id.inputKwota);
         RadioGroup rgKategorie = findViewById(R.id.rgKategorie);
         Button btnZapisz = findViewById(R.id.btnZapiszWydatek);
 
+        // Inicjalizacja bazy
         db = Room.databaseBuilder(getApplicationContext(),
                         BazaDanych.class, "baza-wydatkow")
                 .fallbackToDestructiveMigration()
                 .build();
 
+        // Kliknięcie zapisz
         btnZapisz.setOnClickListener(v -> {
             String tytul = inputTytul.getText().toString();
             String kwotaStr = inputKwota.getText().toString();
@@ -44,6 +47,7 @@ public class DodajActivity extends AppCompatActivity {
                 kategoria = rb.getText().toString();
             }
 
+            // Walidacja czy pola nie są puste
             if (!tytul.isEmpty() && !kwotaStr.isEmpty()) {
                 Wydatek nowyWydatek = new Wydatek();
                 nowyWydatek.tytul = tytul;
@@ -51,12 +55,12 @@ public class DodajActivity extends AppCompatActivity {
                 nowyWydatek.kategoria = kategoria;
                 nowyWydatek.data = System.currentTimeMillis();
 
-                // --- NOWOŚĆ: Pobieramy walutę z ustawień i zapisujemy w wydatku ---
+                // Pobieramy walutę z ustawień i zapisujemy w wydatku
                 SharedPreferences sharedPref = getSharedPreferences("MojeUstawienia", MODE_PRIVATE);
                 String aktualnaWaluta = sharedPref.getString("WALUTA", "PLN");
                 nowyWydatek.waluta = aktualnaWaluta;
-                // ------------------------------------------------------------------
 
+                // Zapis do bazy
                 CompletableFuture.runAsync(() -> db.wydatekDao().insert(nowyWydatek))
                         .thenRun(() -> runOnUiThread(() -> {
                             Toast.makeText(this, "Zapisano!", Toast.LENGTH_SHORT).show();

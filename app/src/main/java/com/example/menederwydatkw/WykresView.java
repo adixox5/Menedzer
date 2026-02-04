@@ -17,6 +17,7 @@ public class WykresView extends View {
     private float maxKwota = 50;
     private float postepAnimacji = 1f;
 
+    // Kolory
     private final int[] kolory = {
             Color.parseColor("#2196F3"), // Niebieski
             Color.parseColor("#4CAF50"), // Zielony
@@ -41,6 +42,7 @@ public class WykresView extends View {
         invalidate();
     }
 
+    // Ustawia dane i oblicza skalę wykresu
     public void ustawDane(Map<String, Float> dane) {
         this.daneKategorii = dane;
 
@@ -57,6 +59,7 @@ public class WykresView extends View {
         invalidate();
     }
 
+    // Metoda rysowania
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -65,8 +68,8 @@ public class WykresView extends View {
         int width = getWidth();
         int height = getHeight();
 
-        // --- POPRAWKA: Zwiększony margines lewy, żeby liczby się nie ucinały ---
-        int paddingLeft = 180; // Było 120
+        // Marginesy rzeby napisy nie wychodziły poza krawędź
+        int paddingLeft = 180;
         int paddingBottom = 80;
         int paddingTop = 50;
         int paddingRight = 40;
@@ -74,10 +77,11 @@ public class WykresView extends View {
         float chartWidth = width - paddingLeft - paddingRight;
         float chartHeight = height - paddingTop - paddingBottom;
 
-        // --- 1. RYSOWANIE SKALI I SIATKI ---
-        paint.setTextSize(28); // Lekko mniejsza czcionka dla skali
+        // rysowanie skali i siatki
+        paint.setTextSize(28);
         paint.setTextAlign(Paint.Align.RIGHT);
 
+        // Pętla rysuje linie co 50
         for (int wartosc = 0; wartosc <= maxKwota; wartosc += 50) {
             float ratio = (float) wartosc / maxKwota;
             float y = (height - paddingBottom) - (ratio * chartHeight);
@@ -99,7 +103,7 @@ public class WykresView extends View {
             canvas.drawText(wartosc + " " + symbolWaluty, paddingLeft - 20, y + 10, paint);
         }
 
-        // --- 2. RYSOWANIE SŁUPKÓW ---
+        // Słupki
         if (daneKategorii != null && !daneKategorii.isEmpty()) {
             int ilosc = daneKategorii.size();
             float szerokoscSekcji = chartWidth / ilosc;
@@ -111,11 +115,13 @@ public class WykresView extends View {
 
             paint.setTextAlign(Paint.Align.CENTER);
 
+            // Iteracja po danych
             for (Map.Entry<String, Float> entry : daneKategorii.entrySet()) {
                 float kwota = entry.getValue();
                 float ratio = (kwota / maxKwota);
                 float barHeight = ratio * chartHeight * postepAnimacji;
 
+                // Współrzędne prostokąta
                 float left = currentX;
                 float top = (height - paddingBottom) - barHeight;
                 float right = currentX + szerokoscSlupka;

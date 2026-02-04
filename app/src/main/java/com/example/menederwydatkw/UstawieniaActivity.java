@@ -35,11 +35,12 @@ public class UstawieniaActivity extends AppCompatActivity {
 
         editLimit.setText(String.valueOf(sharedPref.getFloat("LIMIT_MIESIECZNY", 1000f)));
 
-        // Ustawienie Spinnera na zapisaną walutę (KLUCZ: "WALUTA")
+        // Ustawienie listy na zapisaną walutę
         String zapisanaWaluta = sharedPref.getString("WALUTA", "PLN");
         int pozycja = adapter.getPosition(zapisanaWaluta);
         if (pozycja >= 0) spinnerWaluta.setSelection(pozycja);
 
+        // Ustawienie przełącznika sortowania
         String sortowanie = sharedPref.getString("SORTOWANIE", "DATA");
         if ("KWOTA".equals(sortowanie)) rbKwota.setChecked(true);
         else rbData.setChecked(true);
@@ -53,12 +54,11 @@ public class UstawieniaActivity extends AppCompatActivity {
                 editor.putFloat("LIMIT_MIESIECZNY", Float.parseFloat(limitStr));
             }
 
-            // WAŻNE: Zapisujemy pod kluczem "WALUTA"
             editor.putString("WALUTA", spinnerWaluta.getSelectedItem().toString());
             editor.putString("SORTOWANIE", rbData.isChecked() ? "DATA" : "KWOTA");
 
             editor.apply();
-            finish(); // Wracamy do MainActivity
+            finish(); // Wraca do MainActivity
         });
     }
 }

@@ -25,12 +25,13 @@ import com.example.menederwydatkw.db.Wydatek;
 
 public class MainActivity extends AppCompatActivity {
 
+    // Zmienne globalne klasy
     private BazaDanych db;
     private WykresView wykresView;
     private TextView tvSumaMiesiac;
     private LinearLayout layoutLista;
 
-    // Zmienna przechowująca aktualną walutę (domyślna)
+    // Zmienna przechowująca aktualną walutę
     private String waluta = "PLN";
     private float limitMiesieczny;
     private String sortowanie;
@@ -48,11 +49,13 @@ public class MainActivity extends AppCompatActivity {
         Button btnUstawienia = findViewById(R.id.btnUstawienia);
         Button btnRaport = findViewById(R.id.btnRaport);
 
+        // Konfiguracja bazy danych
         db = Room.databaseBuilder(getApplicationContext(),
                         BazaDanych.class, "baza-wydatkow")
                 .fallbackToDestructiveMigration()
                 .build();
 
+        // Ustawienie akcji na kliknięcie przycisków
         btnDodaj.setOnClickListener(v -> startActivity(new Intent(this, DodajActivity.class)));
         btnUstawienia.setOnClickListener(v -> startActivity(new Intent(this, UstawieniaActivity.class)));
         btnRaport.setOnClickListener(v -> udostepnijRaport());
@@ -65,13 +68,14 @@ public class MainActivity extends AppCompatActivity {
         odswiezDaneWTle();
     }
 
+    // Odczytuje ustawienia z pamięci telefonu
     private void wczytajUstawienia() {
         SharedPreferences sharedPref = getSharedPreferences("MojeUstawienia", MODE_PRIVATE);
         limitMiesieczny = sharedPref.getFloat("LIMIT_MIESIECZNY", 1000f);
         waluta = sharedPref.getString("WALUTA", "PLN");
         sortowanie = sharedPref.getString("SORTOWANIE", "DATA");
     }
-
+    // Sortowanie
     private void odswiezDaneWTle() {
         CompletableFuture.supplyAsync(() -> {
             List<Wydatek> lista = db.wydatekDao().getAll();
@@ -86,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    // Główna funkcja rysująca listę i wykres
     private void aktualizujInterfejs(List<Wydatek> lista) {
         if (layoutLista == null) return;
 
@@ -94,15 +99,19 @@ public class MainActivity extends AppCompatActivity {
         Map<String, Float> daneDoWykresu = new HashMap<>();
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm", java.util.Locale.getDefault());
 
+        // Pętla po każdym wydatku z listy
         for (Wydatek w : lista) {
             sumaCalkowita += w.kwota;
             daneDoWykresu.put(w.kategoria, daneDoWykresu.getOrDefault(w.kategoria, 0f) + w.kwota);
 
+            // Tworzenie elementu listy
+            // Kontener
             LinearLayout wiersz = new LinearLayout(this);
             wiersz.setOrientation(LinearLayout.HORIZONTAL);
             wiersz.setPadding(10, 10, 10, 10);
             wiersz.setBackgroundColor(Color.parseColor("#FAFAFA"));
 
+            // Margines
             LinearLayout.LayoutParams paramsWiersza = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             paramsWiersza.setMargins(0, 0, 0, 5);
@@ -126,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
             paramsTekst.gravity = android.view.Gravity.CENTER_VERTICAL;
             tv.setLayoutParams(paramsTekst);
 
-            // Tutaj był błąd - teraz klasa jest zaimportowana
+            // Przycisk usuwania
             ImageButton btnUsun = new ImageButton(this);
             btnUsun.setImageResource(android.R.drawable.ic_menu_delete);
             btnUsun.setBackgroundColor(Color.TRANSPARENT);
@@ -145,14 +154,17 @@ public class MainActivity extends AppCompatActivity {
             layoutLista.addView(wiersz);
         }
 
+        // Aktualizacja sumy
         if (tvSumaMiesiac != null) {
             tvSumaMiesiac.setText("Suma: " + String.format("%.2f", sumaCalkowita) + " " + waluta);
             tvSumaMiesiac.setTextColor(sumaCalkowita > limitMiesieczny ? Color.RED : Color.BLACK);
         }
 
+        // Aktualizacja wykresu
         if (wykresView != null) {
             wykresView.ustawWalute(waluta);
             wykresView.ustawDane(daneDoWykresu);
+            // Animacja słupków
             ObjectAnimator anim = ObjectAnimator.ofFloat(wykresView, "postep", 0f, 1f);
             anim.setDuration(1000);
             anim.setInterpolator(new BounceInterpolator());
@@ -160,6 +172,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Funkcja udostępniania raportu
     private void udostepnijRaport() {
         String raport = (tvSumaMiesiac != null) ? tvSumaMiesiac.getText().toString() : "";
         Intent intent = new Intent(Intent.ACTION_SEND);
